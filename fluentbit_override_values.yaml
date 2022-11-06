@@ -13,6 +13,7 @@ config:
       Daemon  Off
       Log_Level info
       Parsers_File parsers.conf
+      Parsers_File custom_parsers.conf
       HTTP_Server On
       HTTP_Listen 0.0.0.0
       HTTP_Port 2020
@@ -24,12 +25,19 @@ config:
       Name tail
       Tag kube.*
       Path /var/log/containers/*.log
-      # multiline.parser docker, cri
-      Parser docker
-      Mem_Buf_Limit 5MB
+      multiline.parser docker, cri
+      Mem_Buf_Limit 10MB
       Skip_Long_Lines On
       DB /var/log/flb_kube.db
       Refresh_Interval 10
+    [INPUT]
+      Name              tail
+      Tag               kube.*
+      Path              C:\var\log\containers\*.log
+      Parser            docker
+      DB                /var/log/flb_kube1.db
+      Skip_Long_Lines   On
+      Refresh_Interval  60
 
   filters: |
     [FILTER]:
@@ -47,3 +55,17 @@ config:
       Host logstash-logstash
       Port 5044
       Format json
+
+  customParsers: |
+    [PARSER]
+      Name cri
+      Format regex
+      Regex ^(?<time>[^ ]+) (?<stream>stdout|stderr) (?<logtag>[^ ]*) (?<message>.*)$
+      Time_Key    time
+      Time_Format %Y-%m-%dT%H:%M:%S.%L%z
+    [PARSER]
+      Name docker
+      Format json
+      Time_Key time
+      Time_Format  %Y-%m-%dT%H:%M:%S.%L
+      Time_Keep On

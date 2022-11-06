@@ -17,7 +17,7 @@ logstashPipeline:
     input {
       http {
         port => 5044
-        add_field => { "[@metadata][input-http]" => "" }
+        add_field => { "[@metadata][input-http]" => "fluent-bit" }
       }
     }
     filter {
