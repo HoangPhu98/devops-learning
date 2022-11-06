@@ -1,0 +1,15 @@
+esConfig:
+  elasticsearch.yml: |
+    xpack.security.enabled: false
+
+services:
+  enabled: true
+  labels: {}
+  labelsHeadless: {}
+  type: NodePort
+  nodePort: "30234"
+  annotations: {}
+  httpPortName: http
+  transportPortName: transport 
+
+replicas: 1

@@ -1,0 +1,39 @@
+httpPort: 9600
+
+service:
+  type: ClusterIP
+  ports:
+    - name: beats
+      port: 5044
+      protocol: TCP
+      targetPort: 5044
+    - name: http
+      port: 9600
+      protocol: TCP
+      targetPort: 9600
+
+logstashPipeline:
+  logstash.conf: |
+    input {
+      http {
+        port => 5044
+        add_field => { "[@metadata][input-http]" => "" }
+      }
+    }
+    filter {
+      if [@metadata][input-http] {
+        date {
+          match => [ "date", "UNIX" ]
+          remove_field => [ "date" ]
+        }
+      }
+      mutate {
+        remove_field => ["headers","host"]
+      }
+    }
+    output {
+      elasticsearch {
+        index => "%{[@metadata][input-http]}-%{+YYYY.MM.dd}"
+        hosts => [ "elasticsearch-master:9200"]
+      }
+    }
